@@ -2,11 +2,11 @@ import pygame
 import random as rand
 import time
 
-def ball_start():
-    tempx = rand.random()
-    tempy = rand.random()
-    vx = 750*(tempx/(tempx+tempy))
-    vy = 375*(tempy/(tempx+tempy))
+def ball_start(atrums):
+    lenkis = random.uniform(-0.25, 0.25) if random.choice([True, False]) else random.uniform(0.75, 1.25)
+    lenkis *= math.pi  #pārvērš uz radiāniem
+    vx = atrums*pygame.math.Vector2.normalize(pygame.Vector2(math.cos(lenkis), math.sin(lenkis))).x
+    vy = atrums*pygame.math.Vector2.normalize(pygame.Vector2(math.cos(lenkis), math.sin(lenkis))).y
     return (-vx, -vy)
 def create_text(text, font, text_color, x, y):
     temp = font.render(text, True, text_color)
@@ -24,7 +24,7 @@ scored = False
 player1_pos = pygame.Vector2(30, screen.get_height() / 2)
 player2_pos = pygame.Vector2(screen.get_width() - 50, screen.get_height() / 2)
 ball_pos = pygame.Vector2(screen.get_width() / 2, screen.get_height() / 2)
-ball_velo = pygame.Vector2(ball_start())
+ball_velo = pygame.Vector2(ball_start(375))
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -33,9 +33,9 @@ while running:
         time.sleep(0.5)
         dt -= 0.5
         if ball_pos.x < 100:
-            ball_velo = pygame.Vector2(ball_start())
+            ball_velo = pygame.Vector2(ball_start(375))
         elif ball_pos.x >= 100:
-            ball_velo = pygame.Vector2(ball_start())
+            ball_velo = pygame.Vector2(ball_start(375))
             ball_velo.x *= (-1)
             ball_velo.y *= (-1)
         ball_pos.x = screen.get_width() / 2
