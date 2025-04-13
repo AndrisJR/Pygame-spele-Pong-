@@ -14,6 +14,7 @@ screen = pygame.display.set_mode((1280, 720))
 clock = pygame.time.Clock()
 def play():
     global score_time
+    score_time = pygame.time.get_ticks()
     pygame.display.set_caption("Pong")
     running = True
     dt = 0
@@ -242,9 +243,9 @@ def main_menu():
             if event.type == pygame.QUIT:
                 running = False
             if event.type == pygame_gui.UI_TEXT_ENTRY_FINISHED and event.ui_object_id == "#player1_text_entry":
-                player1vards = event.text[:8]
+                player1vards = event.text[:12]
             if event.type == pygame_gui.UI_TEXT_ENTRY_FINISHED and event.ui_object_id == "#player2_text_entry":
-                player2vards = event.text[:8]
+                player2vards = event.text[:12]
             Manager.process_events(event)
         Manager.update(dt)
         posx, posy = pygame.mouse.get_pos()
@@ -254,6 +255,8 @@ def main_menu():
                 play()
         elif posx >= 590 and posy >= 390 and posx <= 770 and posy <= 440:
             screen.blit(menu_iest , (0, 0))
+            if pygame.mouse.get_pressed()[0] == True:
+                options()
         elif posx >= 590 and posy >= 480 and posx <= 770 and posy <= 530:
             screen.blit(menu_beigt , (0, 0))
             if pygame.mouse.get_pressed()[0] == True:
@@ -271,23 +274,32 @@ def main_menu():
 def options():
     pygame.display.set_caption("Options")
     running = True
-
+    cursor = pygame.image.load('data/cursor.png')
+    noteikumi = pygame.image.load('data/options.png')
+    spelet = pygame.image.load('data/options_play.png')
+    atpakal = pygame.image.load('data/options_exit.png')
+    pygame.mouse.set_visible(False)
     while running:
-        # poll for events
-        # pygame.QUIT event means the user clicked X to close your window
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
-
-        # fill the screen with a color to wipe away anything from last frame
-        screen.fill("purple")
-
-        # RENDER YOUR GAME HERE
-
-        # flip() the display to put your work on screen
+        screen.fill("black")
+        posx, posy = pygame.mouse.get_pos()
+        
+        
+        if posx >= 20 and posy >= 30 and posx <= 250 and posy <= 120:
+            screen.blit(atpakal, (0, 0))
+            if pygame.mouse.get_pressed()[0] == True:
+                main_menu()
+        elif posx >= 1040 and posy >= 35 and posx <= 1250 and posy <= 120:
+            screen.blit(spelet, (0, 0))
+            if pygame.mouse.get_pressed()[0] == True:
+                play()
+        else:
+            screen.blit(noteikumi, (0, 0))
+        screen.blit(cursor, (posx, posy-25))
         pygame.display.flip()
-
-        clock.tick(60)  # limits FPS to 60
+        clock.tick(60) 
 
     pygame.quit()
 
