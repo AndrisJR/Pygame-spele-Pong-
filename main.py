@@ -12,6 +12,9 @@ player2vards = "2. Spēlētājs"
 pygame.init()
 screen = pygame.display.set_mode((1280, 720))
 clock = pygame.time.Clock()
+pygame.mixer.music.load("data/music.mp3")
+pygame.mixer.music.set_volume(0.05)
+pygame.mixer.music.play(-1)
 def play():
     global score_time
     score_time = pygame.time.get_ticks()
@@ -126,7 +129,7 @@ def play():
                 bumba_velo.x =  2*bumba_velo.x
                 bumba_velo.y =  2*bumba_velo.y
             elif spejas_veids==2:
-                bumba_radius = bumba_radius/2
+                bumba_radius = max(2, bumba_radius/2)
             elif spejas_veids==3:
                 bumba_krasa = pygame.Color(random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
             # jauna speja parādās
