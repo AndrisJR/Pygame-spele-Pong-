@@ -12,12 +12,16 @@ player2vards = "2. Spēlētājs"
 pygame.init()
 screen = pygame.display.set_mode((1280, 720))
 clock = pygame.time.Clock()
-Manager = pygame_gui.UIManager((1280, 720))
 def play():
     global score_time
     pygame.display.set_caption("Pong")
     running = True
     dt = 0
+
+    #speju attēli
+    kaulins = pygame.image.load('data/dice.png')
+    rakete = pygame.image.load('data/rakete.png')
+    mazaks = pygame.image.load('data/smaller.png')
     #spēles objekti
     rakete1_pos = pygame.Vector2(30, screen.get_height() / 2)
     rakete2_pos = pygame.Vector2(screen.get_width() - 50, screen.get_height() / 2)
@@ -27,7 +31,7 @@ def play():
     bumba_radius = 10
     bumba_speed = 400  #sākuma ātrums
     bumba_velo = pygame.Vector2(0, 0)
-
+    bumba_krasa = "white"
     #raketes izmēri
     rakete_width = 20
     rakete_height = 200
@@ -36,6 +40,10 @@ def play():
     score1 = 0
     score2 = 0
 
+    #Spējas objekts
+    spejas_pos = pygame.Vector2(random.uniform(screen.get_width()/2-150, screen.get_width()/2+150), random.uniform(20, screen.get_height()-80))
+    spejas_veids = random.randint(1, 3) # 1 ir rakete, 2 ir smaller, 3 ir dice
+    spejas_velo = 73
     #funkcija, lai atgrieztu bumbu centrā ar jaunu virzienu
     def reset_bumba():
         global score_time
@@ -64,10 +72,14 @@ def play():
     def veidot_tekstu(teksts, fonts, krasa, x, y):
         temp = fonts.render(teksts, True, krasa)
         screen.blit(temp, (x, y))
-    
-
+    def uzzimet_speju():
+        if spejas_veids==1:
+            screen.blit(pygame.transform.scale(rakete, (60, 60)), (spejas_pos.x, spejas_pos.y))
+        elif spejas_veids==2:
+            screen.blit(pygame.transform.scale(mazaks, (60, 60)), (spejas_pos.x, spejas_pos.y))
+        elif spejas_veids==3:
+            screen.blit(pygame.transform.scale(kaulins, (60, 60)), (spejas_pos.x, spejas_pos.y))
     #sāk spēli ar bumbu kustībā
-    
     reset_bumba()
     while running:
         for event in pygame.event.get():
@@ -95,6 +107,30 @@ def play():
         bumba_pos.x += bumba_velo.x * dt
         bumba_pos.y += bumba_velo.y * dt
         
+        #spejas kustība
+        spejas_pos.y = spejas_pos.y + spejas_velo * dt
+        if spejas_pos.y <= 0:
+            spejas_pos.y = 0
+            spejas_velo = (-1)*spejas_velo
+        if spejas_pos.y >= screen.get_height()-60:
+            spejas_pos.y = screen.get_height()-60
+            spejas_velo = (-1)*spejas_velo
+        #bumbiņas sadursme ar speju
+        if (bumba_pos.x+bumba_radius >= spejas_pos.x and 
+            bumba_pos.x-bumba_radius <= spejas_pos.x+60 and
+            bumba_pos.y+bumba_radius >= spejas_pos.y and
+            bumba_pos.y-bumba_radius <= spejas_pos.y+60):
+
+            if spejas_veids==1:
+                bumba_velo.x =  2*bumba_velo.x
+                bumba_velo.y =  2*bumba_velo.y
+            elif spejas_veids==2:
+                bumba_radius = bumba_radius/2
+            elif spejas_veids==3:
+                bumba_krasa = pygame.Color(random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
+            # jauna speja parādās
+            spejas_veids = random.randint(1, 3)
+            spejas_pos = pygame.Vector2(random.uniform(screen.get_width()/2-150, screen.get_width()/2+150), random.uniform(20, screen.get_height()-60))
         #atlēkšana no apakšējās un augšējās sienas
         if bumba_pos.y - bumba_radius <= 0:
             bumba_pos.y = bumba_radius  #neļauj bumbai iziet ārpus ekrāna
@@ -165,25 +201,27 @@ def play():
         else:#uzzīmē objektus 
             pygame.draw.rect(screen, "white", (rakete1_pos.x, rakete1_pos.y, rakete_width, rakete_height))
             pygame.draw.rect(screen, "white", (rakete2_pos.x, rakete2_pos.y, rakete_width, rakete_height))
-            pygame.draw.circle(screen, "white", bumba_pos, bumba_radius)
-
+            pygame.draw.circle(screen, bumba_krasa, bumba_pos, bumba_radius)
+            uzzimet_speju()
             veidot_tekstu(str(score1), pygame.font.SysFont("Impact", 30), "red", 20, 50)
             veidot_tekstu(str(score2), pygame.font.SysFont("Impact", 30), "blue", screen.get_width()-40, 50)
             veidot_tekstu(player1vards, pygame.font.SysFont("Impact", 30), "red", 20, 20)
             veidot_tekstu(player2vards, pygame.font.SysFont("Impact", 30), "blue", screen.get_width()-11*len(player2vards) - 29, 20)
+            
             pygame.display.flip()
         dt = clock.tick(60) / 1000
     pygame.quit()
 
 def main_menu():
     global player1vards, player2vards
+    Manager = pygame_gui.UIManager((1280, 720))
     dt = 0
     pygame.display.set_caption("Main menu")
-    menu = pygame.image.load('main_menu.png')
-    menu_sakt = pygame.image.load('main_menu_sakt.png')
-    menu_iest = pygame.image.load('main_menu_options.png')
-    menu_beigt = pygame.image.load('main_menu_exit.png')
-    cursor = pygame.image.load('cursor.png')
+    menu = pygame.image.load('data/main_menu.png')
+    menu_sakt = pygame.image.load('data/main_menu_sakt.png')
+    menu_iest = pygame.image.load('data/main_menu_options.png')
+    menu_beigt = pygame.image.load('data/main_menu_exit.png')
+    cursor = pygame.image.load('data/cursor.png')
     running = True
     pygame.mouse.set_visible(False)
 
