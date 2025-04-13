@@ -3,13 +3,16 @@ import pygame
 import random
 import math
 import time
-
+import pygame_gui
+import pygame_gui
 score_time = -1
+player1vards = "1. Spēlētājs"
+player2vards = "2. Spēlētājs"
 #pygame uzstādīšana
 pygame.init()
 screen = pygame.display.set_mode((1280, 720))
 clock = pygame.time.Clock()
-
+Manager = pygame_gui.UIManager((1280, 720))
 def play():
     global score_time
     pygame.display.set_caption("Pong")
@@ -148,27 +151,33 @@ def play():
             reset_bumba()
         
         if score1==5: #Uzvar 1. spēlētājs
-            veidot_tekstu("Pirmais spēlētājs uzvar!", pygame.font.SysFont("Impact", 60), "green", 250, screen.get_height()/2 - 25)
+            screen.fill("black")
+            veidot_tekstu(player1vards + " uzvarēja!", pygame.font.SysFont("Impact", 60), "red", 300, screen.get_height()/2 - 25)
             pygame.display.flip()
-            time.sleep(2)
+            time.sleep(2.5)
             main_menu()
         elif score2==5: #Uzvar 2. spēlētājs
-            veidot_tekstu("Otrais spēlētājs uzvar!", pygame.font.SysFont("Impact", 60), "green", 250, screen.get_height()/2 - 25)
+            screen.fill("black")
+            veidot_tekstu(player2vards + " uzvarēja!", pygame.font.SysFont("Impact", 60), "blue", 300, screen.get_height()/2 - 25)
             pygame.display.flip()
-            time.sleep(2)
+            time.sleep(2.5)
             main_menu()
         else:#uzzīmē objektus 
             pygame.draw.rect(screen, "white", (rakete1_pos.x, rakete1_pos.y, rakete_width, rakete_height))
             pygame.draw.rect(screen, "white", (rakete2_pos.x, rakete2_pos.y, rakete_width, rakete_height))
             pygame.draw.circle(screen, "white", bumba_pos, bumba_radius)
 
-            veidot_tekstu(str(score1), pygame.font.SysFont("Impact", 30), "red", 20, 20)
-            veidot_tekstu(str(score2), pygame.font.SysFont("Impact", 30), "blue", screen.get_width()-40, 20)
+            veidot_tekstu(str(score1), pygame.font.SysFont("Impact", 30), "red", 20, 50)
+            veidot_tekstu(str(score2), pygame.font.SysFont("Impact", 30), "blue", screen.get_width()-40, 50)
+            veidot_tekstu(player1vards, pygame.font.SysFont("Impact", 30), "red", 20, 20)
+            veidot_tekstu(player2vards, pygame.font.SysFont("Impact", 30), "blue", screen.get_width()-11*len(player2vards) - 29, 20)
             pygame.display.flip()
         dt = clock.tick(60) / 1000
     pygame.quit()
 
 def main_menu():
+    global player1vards, player2vards
+    dt = 0
     pygame.display.set_caption("Main menu")
     menu = pygame.image.load('main_menu.png')
     menu_sakt = pygame.image.load('main_menu_sakt.png')
@@ -177,11 +186,29 @@ def main_menu():
     cursor = pygame.image.load('cursor.png')
     running = True
     pygame.mouse.set_visible(False)
+
+    player1in = pygame_gui.elements.UITextEntryLine(relative_rect=pygame.Rect(50, 350, 200, 30), manager=Manager, object_id="#player1_text_entry")
+    player2in = pygame_gui.elements.UITextEntryLine(relative_rect=pygame.Rect(screen.get_width()-250, 200, 200, 30), manager=Manager, object_id="#player2_text_entry")
+
+    def player1Display(teksts):
+        fonts = pygame.font.SysFont("Calibri", 30)
+        temp = fonts.render(teksts, True, "BLUE")
+        screen.blit(temp, (50, 300))
+    def player2Display(teksts):
+        fonts = pygame.font.SysFont("Calibri", 30)
+        temp = fonts.render(teksts, True, "RED")
+        screen.blit(temp, (screen.get_width()-250, 150))
     while running:
+        screen.fill("black")
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
-        screen.fill("black")
+            if event.type == pygame_gui.UI_TEXT_ENTRY_FINISHED and event.ui_object_id == "#player1_text_entry":
+                player1vards = event.text[:8]
+            if event.type == pygame_gui.UI_TEXT_ENTRY_FINISHED and event.ui_object_id == "#player2_text_entry":
+                player2vards = event.text[:8]
+            Manager.process_events(event)
+        Manager.update(dt)
         posx, posy = pygame.mouse.get_pos()
         if posx >= 535 and posy >= 250 and posx <= 840 and posy <= 350:
             screen.blit(menu_sakt , (0, 0))
@@ -195,9 +222,12 @@ def main_menu():
                 running = False
         else:
             screen.blit(menu , (0, 0))
+        Manager.draw_ui(screen)
+        player1Display(player1vards)
+        player2Display(player2vards)
         screen.blit(cursor, (posx, posy-25))
         pygame.display.flip()
-        clock.tick(60)
+        dt = clock.tick(60)/1000
     pygame.quit()
 
 def options():
